@@ -101,6 +101,27 @@ Data:
 #           name: 'filter_fn'
 #           args: {'arg1': 'foo', 'arg2': 3.14}
 
+    # Image selection filters to apply to each image (mono mode only) based on parameters in hdf5 file.
+    # Optional list of dictionaries with the following key/value pairs:
+    #   - 'path': Optional string. Path to module containing filter.
+    #             Default: path to DL1DataHandler
+    #   - 'module': Optional string. Name of module containing filter.
+    #               Default: 'utils'
+    #   - 'name': Required string. Name of filter.
+    #   - 'args': Optional dictionary. Arguments to pass to filter using
+    #             filter(file, **args). Default: {}
+    # Valid filter names are those defined in DL1DataHandler or any defined
+    # in the specified path and module.
+    image_selection_from_file:
+        -
+            name: 'image_parameters_filter'
+            args: {algorithm: 0, parameter: 'hillas_intensity', threshold_min: 100.0, threshold_max: 5000.0}
+#       -
+#           path: '/path/to/my/module/'
+#           module: 'my_filter'
+#           name: 'filter_fn'
+#           args: {'arg1': 'foo', 'arg2': 3.14}
+
     # Whether to shuffle the examples.
     # Optional Boolean. Default: False
     shuffle: false
