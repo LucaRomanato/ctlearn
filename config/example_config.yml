@@ -42,7 +42,7 @@ Data:
     # Camera images from the following telescopes can be read, but writers
     # for the data are not yet available:
     #   - FACT, HESS-I, HESS-II, MAGIC, VERITAS
-    selected_telescope_type: 'LST_LSTCam'
+    selected_telescope_type: 'LST_LSTCam'     # New format is LST_LST_LSTCam, It is added 
 
     # Subset of telescope IDs to include of the selected telescope types.
     # Optional dictionary with string keys and list of integer values.
@@ -114,7 +114,7 @@ Data:
     # in the specified path and module.
     image_selection_from_file:
         -
-            name: 'image_parameters_filter'
+            name: 'hillas_parameters_filter'  #we have hillas, leakage, concentration, timing and morphology 
             args: {algorithm: 0, parameter: 'hillas_intensity', threshold_min: 100.0, threshold_max: 5000.0}
 #       -
 #           path: '/path/to/my/module/'
