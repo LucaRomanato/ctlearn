@@ -10,6 +10,7 @@ import yaml
 
 import tensorflow as tf
 
+
 def setup_DL1DataReader(config, mode):
     # Parse file list or prediction file list
     if mode in ['train', 'load_only']:
@@ -54,6 +55,14 @@ def setup_DL1DataReader(config, mode):
         image_selection[filter_fn] = filter_params
     config['Data']['image_selection'] = image_selection
 
+    # Parse list of image selection filters from file
+    image_selection = {}
+    for s in config['Data'].get('image_selection_from_file', {}):
+        s = {'module': 'dl1_data_handler.filters', **s}
+        filter_fn, filter_params = load_from_module(**s)
+        image_selection[filter_fn] = filter_params
+    config['Data']['image_selection_from_file'] = image_selection
+
     # Parse list of Transforms
     transforms = []
     for t in config['Data'].get('transforms', {}):
@@ -63,10 +72,9 @@ def setup_DL1DataReader(config, mode):
     config['Data']['transforms'] = transforms
 
     # Convert interpolation image shapes from lists to tuples, if present
-    if 'interpolation_image_shape' in config['Data'].get('mapping_settings',{}):
+    if 'interpolation_image_shape' in config['Data'].get('mapping_settings', {}):
         config['Data']['mapping_settings']['interpolation_image_shape'] = {
             k: tuple(l) for k, l in config['Data']['mapping_settings']['interpolation_image_shape'].items()}
-
 
     # Possibly add additional info to load if predicting to write later
     if mode == 'predict':
@@ -85,6 +93,7 @@ def setup_DL1DataReader(config, mode):
 
     return config['Data']
 
+
 def load_from_module(name, module, path=None, args=None):
     if path is not None and path not in sys.path:
         sys.path.append(path)
@@ -93,9 +102,9 @@ def load_from_module(name, module, path=None, args=None):
     params = args if args is not None else {}
     return fn, params
 
+
 # Define format for TensorFlow dataset
 def setup_TFdataset_format(config, example_description, labels):
-
     config['Input']['output_names'] = [d['name'] for d
                                        in example_description]
     # TensorFlow does not support conversion for NumPy unsigned dtypes
@@ -110,16 +119,16 @@ def setup_TFdataset_format(config, example_description, labels):
 
     return config['Input']
 
+
 # Define input function for TF Estimator
 def input_fn(reader, indices, output_names, output_dtypes,
              label_names, shuffle_and_repeat=False, num_epochs=None, seed=None,
              batch_size=1, prefetch_to_device=None,
              add_labels_to_features=False):
-
     dataset = tf.data.Dataset.from_tensor_slices(indices)
     if shuffle_and_repeat:
         dataset = dataset.shuffle(buffer_size=len(indices), seed=seed,
-                                      reshuffle_each_iteration=True)
+                                  reshuffle_each_iteration=True)
         dataset = dataset.repeat(num_epochs)
     dataset = dataset.map(lambda x: tf.py_function(func=reader.__getitem__,
                                                    inp=[x],
@@ -138,10 +147,10 @@ def input_fn(reader, indices, output_names, output_dtypes,
 
     features, labels = {}, {}
     for tensor, name in zip(example, output_names):
-         dic = labels if name in label_names else features
-         dic[name] = tensor
+        dic = labels if name in label_names else features
+        dic[name] = tensor
 
     if add_labels_to_features:  # for predict mode
-         features['labels'] = labels
+        features['labels'] = labels
 
     return features, labels
