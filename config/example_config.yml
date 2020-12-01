@@ -136,6 +136,14 @@ Data:
     # the telescope tables of your data files.
     image_channels: ['charge']
 
+
+    # Parameters to load.
+    # Used for NN training in the ??? model ( coming soon I hope )
+    # Valid options are 'hillas_intensity' and 'hillas_intensity', or whichever columns are in
+    # the parameters tables of your data files.
+    # the parameters table algorithm is the same in the image_selection_from_file section
+    training_parameters: ['hillas_intensity', 'hillas_intensity']
+
     # Settings passed directly as arguments to ImageMapper.
     # Optional dictionary. Default: {}
     #
