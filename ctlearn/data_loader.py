@@ -56,12 +56,12 @@ def setup_DL1DataReader(config, mode):
     config['Data']['image_selection'] = image_selection
 
     # Parse list of image selection filters from file
-    image_selection = {}
+    image_selection_from_file = {}
     for s in config['Data'].get('image_selection_from_file', {}):
         s = {'module': 'dl1_data_handler.filters', **s}
         filter_fn, filter_params = load_from_module(**s)
-        image_selection[filter_fn] = filter_params
-    config['Data']['image_selection_from_file'] = image_selection
+        image_selection_from_file[filter_fn] = filter_params
+    config['Data']['image_selection_from_file'] = image_selection_from_file
 
     # Parse list of Transforms
     transforms = []
@@ -152,5 +152,4 @@ def input_fn(reader, indices, output_names, output_dtypes,
 
     if add_labels_to_features:  # for predict mode
         features['labels'] = labels
-
     return features, labels
