@@ -108,14 +108,14 @@ Data:
     #   - 'module': Optional string. Name of module containing filter.
     #               Default: 'utils'
     #   - 'name': Required string. Name of filter.
-    #   - 'args': Optional dictionary. Arguments to pass to filter using
-    #             filter(file, **args). Default: {}
+    #   - 'args': required dictionary. Arguments to pass to filter using
+    #             filter(file, **args).
     # Valid filter names are those defined in DL1DataHandler or any defined
     # in the specified path and module.
     image_selection_from_file:
         -
             name: 'hillas_parameters_filter'  #we have hillas, leakage, concentration, timing and morphology 
-            args: {algorithm: 0, parameter: 'hillas_intensity', threshold_min: 100.0, threshold_max: 5000.0}
+            args: {algorithm: 0, parameter: 'hillas_intensity', threshold_min: 100.0, threshold_max: 5000.0}  #algorithm and parameter are required
 #       -
 #           path: '/path/to/my/module/'
 #           module: 'my_filter'
@@ -138,11 +138,11 @@ Data:
 
 
     # Parameters to load.
-    # Used for NN training in the ??? model ( coming soon I hope )
-    # Valid options are 'hillas_intensity' and 'hillas_intensity', or whichever columns are in
+    # Used for NN training in the fcc_cnn model
+    # Valid options are 'hillas_intensity' and 'leakage_intensity_2', or whichever columns are in
     # the parameters tables of your data files.
     # the parameters table algorithm is the same in the image_selection_from_file section
-    training_parameters: ['hillas_intensity', 'hillas_intensity']
+    training_parameters: ['hillas_intensity', 'leakage_intensity_2']
 
     # Settings passed directly as arguments to ImageMapper.
     # Optional dictionary. Default: {}
@@ -288,6 +288,9 @@ Model:
     #   - {module: 'cnn_rnn', function: 'cnn_rnn_model'}: array model
     #       feeding output of a basic CNN for each  telescope into a
     #       recurrent neural network (RNN)
+    #   - {module: 'fcnn_cnn', function: 'fcnn_cnn_model'}:
+    #       single telescope model using a CNN and a Fully Connected neural network.
+    #       Their outputs are then flatten and concatenated.
     #   - {module: 'variable_input_model', function: 'variable_input_model'}:
     #       array model feeding combined outputs of a CNN for each
     #       telescope into a CNN network head
@@ -360,6 +363,20 @@ Model Parameters:
         # Dropout rate of dropout layers.
         dropout_rate: 0.5
 
+    fcnn_cnn:
+        # Required dict with keys 'module' and 'function' & string values.
+        # Module and function for single telescope CNN and Fully Connected NN.
+        # Valid options:
+        #   - {module: 'basic', function: 'conv_block'}
+        #   - {module: 'basic', function: 'fc_block'}
+        cnn_network: {module: 'basic', function: 'conv_block'}
+        fcnn_network: {module: 'basic', function: 'fc_block'}
+        # Required string or null.
+        # Path to a checkpoint file or model directory from which to load
+        # pretrained network weights. If null, don't load any weights.
+        cnn_pretrained_weights: null
+        fcnn_pretrained_weights: null
+
     variable_input_model:
         # Required dict with keys 'module' and 'function' & string values.
         # Module and function for single telescope CNN.
@@ -388,7 +405,7 @@ Model Parameters:
 
     basic:
         conv_block:
-            # Required list of dicts with keys 'filters', 'kernel_size' and number
+            # Required list of dicts with keys 'filters', 'kernel_size' and 'number'
             # with integer values.
             # If number value is not stored will be automatically set to 1
             # Filter dimension and kernel size for the CNN block
@@ -415,6 +432,15 @@ Model Parameters:
             # array-level models.
             batchnorm: false
 
+        fc_block:
+            # Required list of dicts with keys 'units' and 'number'
+            # with integer values.
+            # If number value is not stored will be automatically set to 1
+            # Units value for the desire number of neurons in the layer
+            # Number for the desired number of dense layers
+            layers:
+                - {units: 256, number: 1}
+                - {units: 128, number: 1}
         fc_head:
             # Required list of integers.
             # Number of units for each fully-connected head dense layer.
