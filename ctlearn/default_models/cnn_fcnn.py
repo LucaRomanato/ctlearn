@@ -26,13 +26,14 @@ def cnn_fcnn_model(features, model_params, example_description, training):
         model_params['cnn_fcnn']['cnn_pretrained_weights'], {'CNN/': 'CNN/'})
 
     # FC part
-    # create a list with all tensor parameters and reshape each tensor
+    # Create a list with all tensor parameters and reshape each tensor as a column
     parameters_data_list = []
     for (name, f), d in zip(features.items(), example_description):
         if name.startswith('parameter_'):
             parameters_data_tmp = tf.reshape(f, [-1, 1], name='Parameter_reshape')
             parameters_data_list.append(parameters_data_tmp)
 
+    # Concatenate parameters on x axis
     parameters_data = parameters_data_list[0]
     for param_tensor in parameters_data_list[1:]:
         parameters_data = tf.concat([parameters_data, param_tensor], 1, name='Parameters_concat')
