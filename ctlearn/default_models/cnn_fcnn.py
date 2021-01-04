@@ -30,6 +30,8 @@ def cnn_fcnn_model(features, model_params, example_description, training):
     parameters_data_list = []
     for (name, f), d in zip(features.items(), example_description):
         if name.startswith('parameter_'):
+            if not f.dtype.is_floating:
+                f = tf.cast(f, dtype=tf.float32)
             parameters_data_tmp = tf.reshape(f, [-1, 1], name='Parameter_reshape')
             parameters_data_list.append(parameters_data_tmp)
 
@@ -46,7 +48,7 @@ def cnn_fcnn_model(features, model_params, example_description, training):
 
     with tf.variable_scope("FCNN"):
         fcnn_output = fcnn_network(parameters_data, params=model_params)
-        fcnn_output = tf.layers.flatten(fcnn_output, name='fcnn_flatten')
+        # fcnn_output = tf.layers.flatten(fcnn_output, name='fcnn_flatten')
 
     if model_params['cnn_fcnn']['fcnn_pretrained_weights']:    tf.contrib.framework.init_from_checkpoint(
         model_params['cnn_fcnn']['fcnn_pretrained_weights'], {'FCNN/': 'FCNN/'})
